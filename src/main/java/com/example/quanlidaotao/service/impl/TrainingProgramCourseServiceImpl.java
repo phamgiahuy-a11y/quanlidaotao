@@ -1,5 +1,6 @@
 package com.example.quanlidaotao.service.impl;
 
+import com.example.quanlidaotao.dto.TrainingProgramCourseDTO;
 import com.example.quanlidaotao.entity.TrainingProgramCourse;
 import com.example.quanlidaotao.exception.ResourceNotFoundException;
 import com.example.quanlidaotao.repository.TrainingProgramCourseRepository;
@@ -22,35 +23,72 @@ public class TrainingProgramCourseServiceImpl implements TrainingProgramCourseSe
 
     @Override
     public Page<TrainingProgramCourse> getAll(Pageable pageable) {
-        return repository.findAll(pageable);
+        return repository.findByIsActiveTrue(pageable);
+    }
+
+    @Override
+    public List<TrainingProgramCourse> getAllList() {
+        return repository.findByIsActiveTrue();
     }
 
     @Override
     public List<TrainingProgramCourse> getByTrainingProgramId(UUID trainingProgramId) {
-        return repository.findByTrainingProgramIdOrderBySortOrderAsc(trainingProgramId);
+        return repository.findByTrainingProgramIdAndIsActiveTrueOrderBySortOrderAsc(trainingProgramId);
     }
 
     @Override
     public TrainingProgramCourse getById(UUID id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy học phần: " + id));
+                .filter(TrainingProgramCourse::getIsActive)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy học phần!"));
     }
 
     @Override
     @Transactional
-    public TrainingProgramCourse create(TrainingProgramCourse tpc) {
+    public TrainingProgramCourse create(TrainingProgramCourseDTO dto) {
+        TrainingProgramCourse tpc = new TrainingProgramCourse();
+        
+        tpc.setTrainingProgramId(dto.getTrainingProgramId());
+        tpc.setCourseId(dto.getCourseId());
+        tpc.setCourseCode(dto.getCourseCode());
+        tpc.setCourseName(dto.getCourseName());
+        tpc.setSemesterId(dto.getSemesterId());
+        tpc.setSemesterCode(dto.getSemesterCode());
+        tpc.setAcademicYear(dto.getAcademicYear());
+        tpc.setIsRequired(dto.getIsRequired());
+        tpc.setGroupCode(dto.getGroupCode());
+        tpc.setCredits(dto.getCredits());
+        tpc.setSortOrder(dto.getSortOrder());
+        tpc.setPrerequisiteCourseId(dto.getPrerequisiteCourseId());
+        tpc.setNote(dto.getNote());
+        tpc.setStatus(dto.getStatus());
         tpc.setCreatedAt(LocalDateTime.now());
         tpc.setIsActive(true);
+
         return repository.save(tpc);
     }
 
     @Override
     @Transactional
-    public TrainingProgramCourse update(UUID id, TrainingProgramCourse tpc) {
-        TrainingProgramCourse existing = getById(id);
-        tpc.setId(id);
-        tpc.setCreatedAt(existing.getCreatedAt());
+    public TrainingProgramCourse update(UUID id, TrainingProgramCourseDTO dto) {
+        TrainingProgramCourse tpc = getById(id);
+        
+        tpc.setTrainingProgramId(dto.getTrainingProgramId());
+        tpc.setCourseId(dto.getCourseId());
+        tpc.setCourseCode(dto.getCourseCode());
+        tpc.setCourseName(dto.getCourseName());
+        tpc.setSemesterId(dto.getSemesterId());
+        tpc.setSemesterCode(dto.getSemesterCode());
+        tpc.setAcademicYear(dto.getAcademicYear());
+        tpc.setIsRequired(dto.getIsRequired());
+        tpc.setGroupCode(dto.getGroupCode());
+        tpc.setCredits(dto.getCredits());
+        tpc.setSortOrder(dto.getSortOrder());
+        tpc.setPrerequisiteCourseId(dto.getPrerequisiteCourseId());
+        tpc.setNote(dto.getNote());
+        tpc.setStatus(dto.getStatus());
         tpc.setUpdatedAt(LocalDateTime.now());
+        
         return repository.save(tpc);
     }
 
@@ -58,8 +96,8 @@ public class TrainingProgramCourseServiceImpl implements TrainingProgramCourseSe
     @Transactional
     public void delete(UUID id) {
         TrainingProgramCourse tpc = getById(id);
-        tpc.setDeletedAt(LocalDateTime.now());
         tpc.setIsActive(false);
+        // Bỏ deletedAt vì Entity không có
         repository.save(tpc);
     }
 }

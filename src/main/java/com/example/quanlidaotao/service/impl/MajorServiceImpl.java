@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,40 +25,48 @@ public class MajorServiceImpl implements MajorService {
     @Override
     public Page<Major> getAll(Pageable pageable, String keyword) {
         if (keyword != null && !keyword.trim().isEmpty()) {
-            String k = keyword.trim();
-            return repository.findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(k, k, pageable);
+            return repository.searchActive(keyword.trim(), pageable);
         }
-        return repository.findAll(pageable);
+        return repository.findByIsActiveTrue(pageable);
     }
 
     @Override
     public List<Major> getAllList() {
-        return repository.findAll();
+        return repository.findByIsActiveTrue();
     }
 
     @Override
     public Major getById(UUID id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngành với id: " + id));
+                .filter(Major::getIsActive)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ngành"));
     }
 
     @Override
     @Transactional
     public Major create(MajorDTO dto) {
-        if (repository.findByCode(dto.getCode()).isPresent()) {
-            throw new IllegalArgumentException("Mã ngành đã tồn tại!");
+        Optional<Major> existing = repository.findByCode(dto.getCode());
+        Major major;
+
+        if (existing.isPresent()) {
+            major = existing.get();
+            if (major.getIsActive()) {
+                throw new RuntimeException("Mã ngành đã tồn tại!");
+            }
+            major.setIsActive(true);
+            major.setDeletedAt(null); // Xóa ngày xóa khi khôi phục
+        } else {
+            major = new Major();
+            major.setCreatedAt(LocalDateTime.now());
         }
 
-        Major major = Major.builder()
-                .code(dto.getCode())
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .departmentId(dto.getDepartmentId())
-                .effectiveDate(dto.getEffectiveDate())
-                .expiryDate(dto.getExpiryDate())
-                .createdAt(LocalDateTime.now())
-                .isActive(true)
-                .build();
+        major.setCode(dto.getCode());
+        major.setName(dto.getName());
+        major.setDescription(dto.getDescription());
+        major.setDepartmentId(dto.getDepartmentId());
+        major.setEffectiveDate(dto.getEffectiveDate());
+        major.setExpiryDate(dto.getExpiryDate());
+        major.setIsActive(true);
 
         return repository.save(major);
     }
@@ -65,25 +74,23 @@ public class MajorServiceImpl implements MajorService {
     @Override
     @Transactional
     public Major update(UUID id, MajorDTO dto) {
-        Major existing = getById(id);
-
-        existing.setCode(dto.getCode());
-        existing.setName(dto.getName());
-        existing.setDescription(dto.getDescription());
-        existing.setDepartmentId(dto.getDepartmentId());
-        existing.setEffectiveDate(dto.getEffectiveDate());
-        existing.setExpiryDate(dto.getExpiryDate());
-        existing.setUpdatedAt(LocalDateTime.now());
-
-        return repository.save(existing);
+        Major major = getById(id);
+        major.setCode(dto.getCode());
+        major.setName(dto.getName());
+        major.setDescription(dto.getDescription());
+        major.setDepartmentId(dto.getDepartmentId());
+        major.setEffectiveDate(dto.getEffectiveDate());
+        major.setExpiryDate(dto.getExpiryDate());
+        major.setUpdatedAt(LocalDateTime.now());
+        return repository.save(major);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
         Major major = getById(id);
-        major.setDeletedAt(LocalDateTime.now());
         major.setIsActive(false);
+        major.setDeletedAt(LocalDateTime.now()); // Entity Major có deletedAt
         repository.save(major);
     }
 }

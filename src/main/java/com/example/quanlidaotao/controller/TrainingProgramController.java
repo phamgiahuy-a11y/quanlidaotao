@@ -28,8 +28,9 @@ public class TrainingProgramController {
     public ResponseEntity<ApiResponse<Page<TrainingProgram>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size,
-            @RequestParam(required = false) String keyword) {
-
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) UUID majorId) {
+                
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return ResponseEntity.ok(ApiResponse.success(service.getAll(pageable, keyword)));
     }

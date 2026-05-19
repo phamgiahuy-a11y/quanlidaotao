@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,72 +25,79 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Page<Course> getAll(Pageable pageable, String keyword) {
         if (keyword != null && !keyword.trim().isEmpty()) {
-            return repository.findByNameContainingIgnoreCaseOrCodeContainingIgnoreCase(keyword.trim(), keyword.trim(), pageable);
+            return repository.searchActive(keyword.trim(), pageable);
         }
-        return repository.findAll(pageable);
+        return repository.findByIsActiveTrue(pageable);
     }
 
     @Override
     public List<Course> getAllList() {
-        return repository.findAll();
+        return repository.findByIsActiveTrue();
     }
 
     @Override
     public Course getById(UUID id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy môn học với id: " + id));
+                .filter(Course::getIsActive)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy môn học"));
     }
 
     @Override
     @Transactional
     public Course create(CourseDTO dto) {
-        if (repository.findByCode(dto.getCode()).isPresent()) {
-            throw new IllegalArgumentException("Mã môn học đã tồn tại");
+        Optional<Course> existing = repository.findByCode(dto.getCode());
+        Course course;
+
+        if (existing.isPresent()) {
+            course = existing.get();
+            if (course.getIsActive()) {
+                throw new RuntimeException("Mã môn học đã tồn tại và đang hoạt động!");
+            }
+            course.setIsActive(true); // Khôi phục môn học bị xóa mềm
+        } else {
+            course = new Course();
+            course.setCreatedAt(LocalDateTime.now());
         }
 
-        Course course = Course.builder()
-                .code(dto.getCode())
-                .name(dto.getName())
-                .nameEn(dto.getNameEn())
-                .credits(dto.getCredits())
-                .courseType(dto.getCourseType())
-                .theoryHours(dto.getTheoryHours())
-                .practiceHours(dto.getPracticeHours())
-                .selfStudyHours(dto.getSelfStudyHours())
-                .description(dto.getDescription())
-                .departmentId(dto.getDepartmentId())
-                .createdAt(LocalDateTime.now())
-                .isActive(true)
-                .build();
-
+        course.setCode(dto.getCode());
+        course.setName(dto.getName());
+        course.setNameEn(dto.getNameEn());
+        course.setCredits(dto.getCredits());
+        course.setCourseType(dto.getCourseType());
+        course.setTheoryHours(dto.getTheoryHours());
+        course.setPracticeHours(dto.getPracticeHours());
+        course.setSelfStudyHours(dto.getSelfStudyHours());
+        course.setDescription(dto.getDescription());
+        course.setDepartmentId(dto.getDepartmentId());
+        course.setIsActive(true);
+        
         return repository.save(course);
     }
 
     @Override
     @Transactional
     public Course update(UUID id, CourseDTO dto) {
-        Course existing = getById(id);
-        existing.setCode(dto.getCode());
-        existing.setName(dto.getName());
-        existing.setNameEn(dto.getNameEn());
-        existing.setCredits(dto.getCredits());
-        existing.setCourseType(dto.getCourseType());
-        existing.setTheoryHours(dto.getTheoryHours());
-        existing.setPracticeHours(dto.getPracticeHours());
-        existing.setSelfStudyHours(dto.getSelfStudyHours());
-        existing.setDescription(dto.getDescription());
-        existing.setDepartmentId(dto.getDepartmentId());
-        existing.setUpdatedAt(LocalDateTime.now());
-
-        return repository.save(existing);
+        Course course = getById(id);
+        course.setCode(dto.getCode());
+        course.setName(dto.getName());
+        course.setNameEn(dto.getNameEn());
+        course.setCredits(dto.getCredits());
+        course.setCourseType(dto.getCourseType());
+        course.setTheoryHours(dto.getTheoryHours());
+        course.setPracticeHours(dto.getPracticeHours());
+        course.setSelfStudyHours(dto.getSelfStudyHours());
+        course.setDescription(dto.getDescription());
+        course.setDepartmentId(dto.getDepartmentId());
+        course.setUpdatedAt(LocalDateTime.now());
+        return repository.save(course);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
         Course course = getById(id);
-        course.setDeletedAt(LocalDateTime.now());
-        course.setIsActive(false);
+        course.setIsActive(false); 
+        // Bỏ deletedAt vì Entity Course không có
         repository.save(course);
     }
 }

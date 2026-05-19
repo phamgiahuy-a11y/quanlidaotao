@@ -11,9 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface TrainingProgramCourseRepository extends JpaRepository<TrainingProgramCourse, UUID> {
-
-    List<TrainingProgramCourse> findByTrainingProgramId(UUID trainingProgramId);
-    List<TrainingProgramCourse> findByTrainingProgramIdOrderBySortOrderAsc(UUID trainingProgramId);
-
-    Page<TrainingProgramCourse> findAll(Pageable pageable);   // ← Quan trọng
+    Page<TrainingProgramCourse> findByIsActiveTrue(Pageable pageable);
+    List<TrainingProgramCourse> findByIsActiveTrue();
+    List<TrainingProgramCourse> findByTrainingProgramIdAndIsActiveTrueOrderBySortOrderAsc(UUID trainingProgramId);
 }

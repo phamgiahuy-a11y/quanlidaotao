@@ -3,193 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QL Đào Tạo</title>
+    <title>QL Đào Tạo - Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .sidebar-active { background-color: #1e40af; color: white; }
+        .sidebar-active { background-color: #1e40af; color: white; border-left: 4px solid #60a5fa; }
+        table { border-collapse: collapse; }
+        th, td { padding: 14px 16px; }
     </style>
 </head>
-<body class="bg-gray-100 flex h-screen">
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
     <!-- Sidebar -->
-    <div class="w-72 bg-blue-700 text-white flex flex-col">
-        <div class="p-6 text-2xl font-bold border-b border-blue-600">QL Đào Tạo</div>
+    <div class="w-72 bg-blue-900 text-white flex flex-col">
+        <div class="p-6 text-2xl font-bold border-b border-blue-800">QL ĐÀO TẠO</div>
         <nav class="flex-1 py-6">
-            <a onclick="switchSection(0)" id="menu-0" class="sidebar-active flex items-center px-6 py-4 hover:bg-blue-600 cursor-pointer">
+            <a onclick="switchSection(0)" id="menu-0" class="sidebar-active flex items-center px-6 py-4 hover:bg-blue-800 cursor-pointer">
                 <i class="fas fa-graduation-cap mr-3"></i> Ngành Đào Tạo
             </a>
-            <a onclick="switchSection(1)" id="menu-1" class="flex items-center px-6 py-4 hover:bg-blue-600 cursor-pointer">
+            <a onclick="switchSection(1)" id="menu-1" class="flex items-center px-6 py-4 hover:bg-blue-800 cursor-pointer">
                 <i class="fas fa-layer-group mr-3"></i> Chương Trình Đào Tạo
             </a>
-            <a onclick="switchSection(2)" id="menu-2" class="flex items-center px-6 py-4 hover:bg-blue-600 cursor-pointer">
+            <a onclick="switchSection(2)" id="menu-2" class="flex items-center px-6 py-4 hover:bg-blue-800 cursor-pointer">
                 <i class="fas fa-book mr-3"></i> Môn Học
             </a>
-            <a onclick="switchSection(3)" id="menu-3" class="flex items-center px-6 py-4 hover:bg-blue-600 cursor-pointer">
+            <a onclick="switchSection(3)" id="menu-3" class="flex items-center px-6 py-4 hover:bg-blue-800 cursor-pointer">
                 <i class="fas fa-list-check mr-3"></i> Học Phần CTĐT
             </a>
         </nav>
     </div>
 
     <!-- Main Content -->
-    <div class="flex-1 overflow-auto">
-        <div class="p-8">
-            <h1 class="text-3xl font-bold text-gray-800" id="pageTitle">Chương Trình Đào Tạo</h1>
-            <p class="text-gray-600" id="pageDesc">Quản lý chương trình đào tạo</p>
+    <div class="flex-1 overflow-auto p-8">
+        <h1 class="text-3xl font-bold text-gray-800" id="pageTitle">Ngành Đào Tạo</h1>
 
-            <!-- Bộ lọc + Thao tác -->
-            <div class="bg-white p-6 rounded-2xl shadow mt-8">
-                <div class="flex flex-wrap gap-4 items-end">
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Tìm kiếm</label>
-                        <input id="searchInput" placeholder="Mã hoặc tên..." 
-                               class="w-80 px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">Trạng thái</label>
-                        <select class="px-4 py-3 border border-gray-300 rounded-xl">
-                            <option>Tất cả</option>
-                            <option>Hoạt động</option>
-                            <option>Không hoạt động</option>
-                        </select>
-                    </div>
-                    <button onclick="searchData()" 
-                            class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700">
-                        <i class="fas fa-search"></i> Tìm
-                    </button>
-                    <button onclick="showCreateModal()" 
-                            class="bg-green-600 text-white px-6 py-3 rounded-xl flex items-center gap-2 hover:bg-green-700 ml-auto">
-                        <i class="fas fa-plus"></i> Thêm Mới
-                    </button>
-                </div>
-            </div>
+        <div class="mt-8 flex gap-4">
+            <input id="searchInput" placeholder="Tìm theo mã hoặc tên..." 
+                   class="flex-1 max-w-md px-5 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500">
+            <button onclick="searchData()" 
+                    class="bg-blue-600 text-white px-8 rounded-2xl hover:bg-blue-700">Tìm</button>
+            <button onclick="showCreateModal()" 
+                    class="bg-green-600 text-white px-6 rounded-2xl flex items-center gap-2 hover:bg-green-700">
+                <i class="fas fa-plus"></i> Thêm mới
+            </button>
+        </div>
 
-            <!-- Bảng dữ liệu -->
-            <div class="bg-white rounded-2xl shadow mt-6 overflow-hidden">
-                <table class="w-full" id="dataTable">
-                    <thead class="bg-gray-50" id="tableHeader"></thead>
-                    <tbody id="tableBody" class="divide-y"></tbody>
-                </table>
-            </div>
+        <div class="mt-6 bg-white rounded-3xl shadow overflow-hidden">
+            <table class="w-full" id="dataTable">
+                <thead id="tableHeader" class="bg-gray-100"></thead>
+                <tbody id="tableBody" class="divide-y"></tbody>
+            </table>
         </div>
     </div>
 
     <!-- Modal -->
     <div id="modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-white rounded-3xl w-full max-w-lg mx-4">
-            <div class="px-8 py-5 border-b flex justify-between items-center">
-                <h2 class="text-xl font-semibold" id="modalTitle">Thêm Mới</h2>
-                <button onclick="closeModal()" class="text-3xl text-gray-400 hover:text-gray-600">×</button>
+        <div class="bg-white rounded-3xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-auto">
+            <div class="px-8 py-5 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-3xl">
+                <h2 class="text-xl font-semibold" id="modalTitle"></h2>
+                <button onclick="closeModal()" class="text-3xl leading-none hover:text-gray-400">×</button>
             </div>
             <div class="p-8" id="modalContent"></div>
         </div>
     </div>
 
     <script>
-        let currentSection = 1;
-        const baseUrl = "http://localhost:8080/api";
+    let currentSection = 0;
+    const baseUrl = "http://localhost:8080/api";
 
-        const sections = [
-            {api: "/majors", title: "Ngành Đào Tạo"},
-            {api: "/training-programs", title: "Chương Trình Đào Tạo"},
-            {api: "/courses", title: "Môn Học"},
-            {api: "/training-program-courses", title: "Học Phần CTĐT"}
-        ];
+    const sections = [
+        { api: "/majors", title: "Ngành Đào Tạo", name: "ngành" },
+        { api: "/training-programs", title: "Chương Trình Đào Tạo", name: "chương trình" },
+        { api: "/courses", title: "Môn Học", name: "môn học" },
+        { api: "/training-program-courses", title: "Học Phần CTĐT", name: "học phần" }
+    ];
 
-        async function loadData(keyword = '') {
-            const sec = sections[currentSection];
-            try {
-                const res = await fetch(`${baseUrl}${sec.api}?page=0&size=50${keyword ? '&keyword='+encodeURIComponent(keyword) : ''}`);
-                const json = await res.json();
-                const items = json.data?.content || json.data || [];
-                renderTable(items);
-            } catch (e) { console.error(e); }
+    async function loadData(keyword = '') {
+        try {
+            let url = `${baseUrl}${sections[currentSection].api}?page=0&size=50`;
+            if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+
+            const res = await fetch(url);
+            const json = await res.json();
+            renderTable(json.data?.content || json.data || []);
+        } catch(e) {
+            Swal.fire('Lỗi', 'Không thể tải dữ liệu', 'error');
         }
+    }
 
-        function renderTable(items) {
-            let header = `<tr class="bg-gray-50"><th class="px-6 py-4 text-left">Mã</th><th class="px-6 py-4 text-left">Tên</th><th class="px-6 py-4 text-left">Thông tin</th><th class="px-6 py-4 text-center">Thao tác</th></tr>`;
-            document.getElementById("tableHeader").innerHTML = header;
+    function renderTable(items) {
+        const header = document.getElementById("tableHeader");
+        const body = document.getElementById("tableBody");
 
-            let body = '';
-            items.forEach(item => {
-                body += `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 font-medium">${item.code || ''}</td>
-                    <td class="px-6 py-4">${item.name || item.courseName || ''}</td>
-                    <td class="px-6 py-4 text-gray-600">${item.description || item.credits || ''}</td>
-                    <td class="px-6 py-4 text-center">
-                        <button onclick="editItem('${item.id}')" class="bg-amber-500 text-white px-4 py-1 rounded-lg text-sm mr-2">Sửa</button>
-                        <button onclick="deleteItem('${item.id}')" class="bg-red-500 text-white px-4 py-1 rounded-lg text-sm">Xóa</button>
-                    </td>
+        let headerHTML = '';
+        let bodyHTML = '';
+
+        switch(currentSection) {
+            case 0: // Major
+                headerHTML = `<tr class="bg-gray-100"><th class="px-6 py-4 text-left">Mã</th><th class="px-6 py-4 text-left">Tên Ngành</th><th class="px-6 py-4 text-center">Thao tác</th></tr>`;
+                bodyHTML = items.map(item => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium">${item.code}</td>
+                        <td class="px-6 py-4">${item.name}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="editItem('${item.id}')" class="text-blue-600 hover:text-blue-800 mx-2">Sửa</button>
+                            <button onclick="deleteItem('${item.id}')" class="text-red-600 hover:text-red-800 mx-2">Xóa</button>
+                        </td>
+                    </tr>`).join('');
+                break;
+
+            case 1: // Training Program
+                headerHTML = `<tr class="bg-gray-100"><th class="px-6 py-4">Mã CT</th><th class="px-6 py-4">Tên chương trình</th><th class="px-6 py-4">Tín chỉ</th><th class="px-6 py-4 text-center">Thao tác</th></tr>`;
+                bodyHTML = items.map(item => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">${item.code}</td>
+                        <td class="px-6 py-4">${item.name}</td>
+                        <td class="px-6 py-4">${item.totalCredits || ''}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="editItem('${item.id}')" class="text-blue-600 hover:text-blue-800 mx-2">Sửa</button>
+                            <button onclick="deleteItem('${item.id}')" class="text-red-600 hover:text-red-800 mx-2">Xóa</button>
+                        </td>
+                    </tr>`).join('');
+                break;
+
+            case 2: // Course
+                headerHTML = `<tr class="bg-gray-100"><th class="px-6 py-4">Mã HP</th><th class="px-6 py-4">Tên học phần</th><th class="px-6 py-4">Tín chỉ</th><th class="px-6 py-4 text-center">Thao tác</th></tr>`;
+                bodyHTML = items.map(item => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">${item.code}</td>
+                        <td class="px-6 py-4">${item.name}</td>
+                        <td class="px-6 py-4">${item.credits}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="editItem('${item.id}')" class="text-blue-600 hover:text-blue-800 mx-2">Sửa</button>
+                            <button onclick="deleteItem('${item.id}')" class="text-red-600 hover:text-red-800 mx-2">Xóa</button>
+                        </td>
+                    </tr>`).join('');
+                break;
+
+            case 3: // Training Program Course
+                headerHTML = `<tr class="bg-gray-100">
+                    <th class="px-6 py-4">Chương trình</th>
+                    <th class="px-6 py-4">Học phần</th>
+                    <th class="px-6 py-4">Học kỳ</th>
+                    <th class="px-6 py-4 text-center">Bắt buộc</th>
+                    <th class="px-6 py-4 text-center">Thao tác</th>
                 </tr>`;
-            });
-            document.getElementById("tableBody").innerHTML = body;
+                bodyHTML = items.map(item => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">${item.trainingProgramName || 'N/A'}</td>
+                        <td class="px-6 py-4">${item.courseName || item.courseCode || 'N/A'}</td>
+                        <td class="px-6 py-4">${item.semesterCode || ''}</td>
+                        <td class="px-6 py-4 text-center">${item.isRequired ? '✅' : '❌'}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="editItem('${item.id}')" class="text-blue-600 hover:text-blue-800 mx-2">Sửa</button>
+                            <button onclick="deleteItem('${item.id}')" class="text-red-600 hover:text-red-800 mx-2">Xóa</button>
+                        </td>
+                    </tr>`).join('');
+                break;
         }
 
-        function switchSection(n) {
-            currentSection = n;
-            document.querySelectorAll('nav a').forEach((el,i) => el.classList.toggle('sidebar-active', i===n));
-            document.getElementById("pageTitle").textContent = sections[n].title;
-            loadData();
+        header.innerHTML = headerHTML;
+        body.innerHTML = bodyHTML || `<tr><td colspan="10" class="text-center py-12 text-gray-500">Chưa có dữ liệu</td></tr>`;
+    }
+
+    // Delete (đã fix)
+    async function deleteItem(id) {
+        const result = await Swal.fire({
+            title: 'Xác nhận xóa?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const res = await fetch(`${baseUrl}${sections[currentSection].api}/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                Swal.fire('Thành công!', 'Đã xóa thành công', 'success');
+                loadData();
+            } else {
+                Swal.fire('Lỗi', 'Không thể xóa dữ liệu', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Lỗi', 'Không kết nối được với server', 'error');
         }
+    }
 
-        function searchData() {
-            loadData(document.getElementById("searchInput").value.trim());
-        }
+    // Modal functions
+    function showCreateModal() {
+        document.getElementById("modalTitle").textContent = `Thêm ${sections[currentSection].title}`;
+        document.getElementById("modalContent").innerHTML = getFormHTML(null);
+        document.getElementById("modal").classList.remove("hidden");
+    }
 
-        function showCreateModal() {
-            document.getElementById("modalTitle").textContent = `Thêm ${sections[currentSection].title}`;
-            document.getElementById("modalContent").innerHTML = `
-                <div class="space-y-5">
-                    <input id="code" placeholder="Mã" class="w-full border rounded-xl px-4 py-3">
-                    <input id="name" placeholder="Tên đầy đủ" class="w-full border rounded-xl px-4 py-3">
-                    <textarea id="desc" placeholder="Mô tả / Thông tin thêm" class="w-full border rounded-xl px-4 py-3 h-32"></textarea>
-                </div>
-                <div class="flex justify-end gap-4 mt-8">
-                    <button onclick="closeModal()" class="px-6 py-3 border rounded-xl">Hủy</button>
-                    <button onclick="saveItem()" class="px-6 py-3 bg-blue-600 text-white rounded-xl">Lưu</button>
-                </div>`;
-            document.getElementById("modal").classList.remove("hidden");
-        }
+    async function editItem(id) {
+        document.getElementById("modalTitle").textContent = `Sửa ${sections[currentSection].title}`;
+        document.getElementById("modalContent").innerHTML = `<p class="text-center py-8">Đang tải...</p>`;
+        document.getElementById("modal").classList.remove("hidden");
 
-        async function editItem(id) {
-            document.getElementById("modalTitle").textContent = "Sửa Thông Tin";
-            document.getElementById("modalContent").innerHTML = `<p class="text-center py-8">Đang tải...</p>`;
-            document.getElementById("modal").classList.remove("hidden");
-
+        try {
             const res = await fetch(`${baseUrl}${sections[currentSection].api}/${id}`);
             const json = await res.json();
-            const item = json.data;
+            document.getElementById("modalContent").innerHTML = getFormHTML(json.data || json);
+        } catch (e) {
+            Swal.fire('Lỗi', 'Không lấy được thông tin', 'error');
+        }
+    }
 
-            document.getElementById("modalContent").innerHTML = `
-                <div class="space-y-5">
-                    <input id="code" value="${item.code||''}" class="w-full border rounded-xl px-4 py-3">
-                    <input id="name" value="${item.name||item.courseName||''}" class="w-full border rounded-xl px-4 py-3">
-                    <textarea id="desc" class="w-full border rounded-xl px-4 py-3 h-32">${item.description||''}</textarea>
+    function getFormHTML(item) {
+        // Bạn có thể mở rộng form theo từng module sau
+        return `
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Mã <span class="text-red-500">*</span></label>
+                    <input id="code" value="${item?.code || ''}" class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none">
                 </div>
-                <div class="flex justify-end gap-4 mt-8">
-                    <button onclick="closeModal()" class="px-6 py-3 border rounded-xl">Hủy</button>
-                    <button onclick="saveItem('${id}')" class="px-6 py-3 bg-blue-600 text-white rounded-xl">Lưu thay đổi</button>
-                </div>`;
+                <div>
+                    <label class="block text-sm font-medium mb-1">Tên <span class="text-red-500">*</span></label>
+                    <input id="name" value="${item?.name || item?.courseName || ''}" class="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none">
+                </div>
+                ${currentSection === 3 ? `
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label>Học kỳ</label><input id="semesterCode" value="${item?.semesterCode || ''}" class="w-full px-4 py-3 border border-gray-300 rounded-2xl"></div>
+                    <div><label>Thứ tự</label><input type="number" id="sortOrder" value="${item?.sortOrder || 1}" class="w-full px-4 py-3 border border-gray-300 rounded-2xl"></div>
+                </div>` : ''}
+            </div>
+            <div class="flex justify-end gap-4 mt-8">
+                <button onclick="closeModal()" class="px-6 py-3 border rounded-2xl hover:bg-gray-100">Hủy</button>
+                <button onclick="saveItem('${item?.id || ''}')" class="px-8 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700">Lưu</button>
+            </div>`;
+    }
+
+    async function saveItem(id = '') {
+        const code = document.getElementById('code').value.trim();
+        const name = document.getElementById('name').value.trim();
+
+        if (!code || !name) {
+            Swal.fire('Thiếu thông tin', 'Vui lòng nhập mã và tên', 'warning');
+            return;
         }
 
-        function saveItem(id = null) {
-            alert(id ? "Cập nhật thành công!" : "Thêm mới thành công!");
-            closeModal();
-            loadData();
+        const payload = { code, name };
+        if (currentSection === 3) {
+            payload.semesterCode = document.getElementById('semesterCode')?.value;
+            payload.sortOrder = parseInt(document.getElementById('sortOrder')?.value) || 1;
         }
 
-        function deleteItem(id) {
-            if (confirm("Xác nhận xóa?")) {
-                alert("Đã xóa thành công!");
+        try {
+            const url = id ? `${baseUrl}${sections[currentSection].api}/${id}` : `${baseUrl}${sections[currentSection].api}`;
+            const res = await fetch(url, {
+                method: id ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                Swal.fire('Thành công', '', 'success');
+                closeModal();
                 loadData();
+            } else {
+                Swal.fire('Lỗi', 'Không thể lưu', 'error');
             }
+        } catch (err) {
+            Swal.fire('Lỗi', 'Không kết nối được server', 'error');
         }
+    }
 
-        function closeModal() {
-            document.getElementById("modal").classList.add("hidden");
-        }
+    function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+    }
 
-        window.onload = () => loadData();
+    function switchSection(n) {
+        currentSection = n;
+        document.querySelectorAll('nav a').forEach((el, i) => el.classList.toggle('sidebar-active', i === n));
+        document.getElementById("pageTitle").textContent = sections[n].title;
+        loadData();
+    }
+
+    function searchData() {
+        loadData(document.getElementById("searchInput").value.trim());
+    }
+
+    window.onload = () => switchSection(0);
     </script>
 </body>
 </html>

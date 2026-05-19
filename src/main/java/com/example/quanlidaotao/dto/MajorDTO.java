@@ -6,10 +6,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter @Setter @Builder
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MajorDTO {
+
     private UUID id;
+
     private UUID departmentId;
 
     @NotBlank(message = "Mã ngành không được để trống")
@@ -20,7 +25,9 @@ public class MajorDTO {
     private String name;
 
     private String description;
+
     private LocalDateTime effectiveDate;
     private LocalDateTime expiryDate;
+
     private Boolean isActive;
 }

@@ -1,6 +1,7 @@
 package com.example.quanlidaotao.controller;
 
 import com.example.quanlidaotao.dto.ApiResponse;
+import com.example.quanlidaotao.dto.TrainingProgramCourseDTO;
 import com.example.quanlidaotao.entity.TrainingProgramCourse;
 import com.example.quanlidaotao.service.TrainingProgramCourseService;
 import jakarta.validation.Valid;
@@ -26,10 +27,14 @@ public class TrainingProgramCourseController {
     public ResponseEntity<ApiResponse<Page<TrainingProgramCourse>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        
+
         Pageable pageable = PageRequest.of(page, size);
-        Page<TrainingProgramCourse> data = service.getAll(pageable);
-        return ResponseEntity.ok(ApiResponse.success(data));
+        return ResponseEntity.ok(ApiResponse.success(service.getAll(pageable)));
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse<List<TrainingProgramCourse>>> getList() {
+        return ResponseEntity.ok(ApiResponse.success(service.getAllList()));
     }
 
     @GetMapping("/program/{programId}")
@@ -44,20 +49,18 @@ public class TrainingProgramCourseController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<TrainingProgramCourse>> create(@Valid @RequestBody TrainingProgramCourse tpc) {
-        TrainingProgramCourse saved = service.create(tpc);
-        return ResponseEntity.ok(ApiResponse.success(saved, "Thêm học phần thành công"));
+    public ResponseEntity<ApiResponse<TrainingProgramCourse>> create(@Valid @RequestBody TrainingProgramCourseDTO dto) {
+        return ResponseEntity.ok(ApiResponse.success(service.create(dto), "Thêm học phần thành công"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<TrainingProgramCourse>> update(@PathVariable UUID id, @Valid @RequestBody TrainingProgramCourse tpc) {
-        TrainingProgramCourse updated = service.update(id, tpc);
-        return ResponseEntity.ok(ApiResponse.success(updated, "Cập nhật thành công"));
+    public ResponseEntity<ApiResponse<TrainingProgramCourse>> update(@PathVariable UUID id, @Valid @RequestBody TrainingProgramCourseDTO dto) {
+        return ResponseEntity.ok(ApiResponse.success(service.update(id, dto), "Cập nhật học phần thành công"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Xóa thành công"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Xóa học phần thành công"));
     }
 }

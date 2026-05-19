@@ -1,6 +1,7 @@
 package com.example.quanlidaotao.controller;
 
 import com.example.quanlidaotao.dto.ApiResponse;
+import com.example.quanlidaotao.dto.CourseDTO;
 import com.example.quanlidaotao.entity.Course;
 import com.example.quanlidaotao.service.CourseService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,11 +27,16 @@ public class CourseController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<Course>>> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "15") int size,
             @RequestParam(required = false) String keyword) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return ResponseEntity.ok(ApiResponse.success(service.getAll(pageable, keyword)));
+    }
+
+    @GetMapping("/list")   // ← Dùng cho dropdown
+    public ResponseEntity<ApiResponse<List<Course>>> getList() {
+        return ResponseEntity.ok(ApiResponse.success(service.getAllList()));
     }
 
     @GetMapping("/{id}")
@@ -38,18 +45,18 @@ public class CourseController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Course>> create(@Valid @RequestBody Course course) {
-        return ResponseEntity.ok(ApiResponse.success(service.create(course), "Tạo môn học thành công"));
+    public ResponseEntity<ApiResponse<Course>> create(@Valid @RequestBody CourseDTO dto) {
+        return ResponseEntity.ok(ApiResponse.success(service.create(dto), "Tạo môn học thành công"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Course>> update(@PathVariable UUID id, @Valid @RequestBody Course course) {
-        return ResponseEntity.ok(ApiResponse.success(service.update(id, course), "Cập nhật thành công"));
+    public ResponseEntity<ApiResponse<Course>> update(@PathVariable UUID id, @Valid @RequestBody CourseDTO dto) {
+        return ResponseEntity.ok(ApiResponse.success(service.update(id, dto), "Cập nhật môn học thành công"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Xóa thành công"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Xóa môn học thành công"));
     }
 }

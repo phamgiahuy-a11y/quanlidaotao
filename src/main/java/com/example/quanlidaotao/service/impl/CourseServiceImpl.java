@@ -1,5 +1,6 @@
 package com.example.quanlidaotao.service.impl;
 
+import com.example.quanlidaotao.dto.CourseDTO;
 import com.example.quanlidaotao.entity.Course;
 import com.example.quanlidaotao.exception.ResourceNotFoundException;
 import com.example.quanlidaotao.repository.CourseRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,6 +30,11 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public List<Course> getAllList() {
+        return repository.findAll();
+    }
+
+    @Override
     public Course getById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy môn học với id: " + id));
@@ -35,23 +42,46 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public Course create(Course course) {
-        if (repository.findByCode(course.getCode()).isPresent()) {
+    public Course create(CourseDTO dto) {
+        if (repository.findByCode(dto.getCode()).isPresent()) {
             throw new IllegalArgumentException("Mã môn học đã tồn tại");
         }
-        course.setCreatedAt(LocalDateTime.now());
-        course.setIsActive(true);
+
+        Course course = Course.builder()
+                .code(dto.getCode())
+                .name(dto.getName())
+                .nameEn(dto.getNameEn())
+                .credits(dto.getCredits())
+                .courseType(dto.getCourseType())
+                .theoryHours(dto.getTheoryHours())
+                .practiceHours(dto.getPracticeHours())
+                .selfStudyHours(dto.getSelfStudyHours())
+                .description(dto.getDescription())
+                .departmentId(dto.getDepartmentId())
+                .createdAt(LocalDateTime.now())
+                .isActive(true)
+                .build();
+
         return repository.save(course);
     }
 
     @Override
     @Transactional
-    public Course update(UUID id, Course course) {
+    public Course update(UUID id, CourseDTO dto) {
         Course existing = getById(id);
-        course.setId(id);
-        course.setCreatedAt(existing.getCreatedAt());
-        course.setUpdatedAt(LocalDateTime.now());
-        return repository.save(course);
+        existing.setCode(dto.getCode());
+        existing.setName(dto.getName());
+        existing.setNameEn(dto.getNameEn());
+        existing.setCredits(dto.getCredits());
+        existing.setCourseType(dto.getCourseType());
+        existing.setTheoryHours(dto.getTheoryHours());
+        existing.setPracticeHours(dto.getPracticeHours());
+        existing.setSelfStudyHours(dto.getSelfStudyHours());
+        existing.setDescription(dto.getDescription());
+        existing.setDepartmentId(dto.getDepartmentId());
+        existing.setUpdatedAt(LocalDateTime.now());
+
+        return repository.save(existing);
     }
 
     @Override
